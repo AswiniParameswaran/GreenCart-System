@@ -66,9 +66,9 @@ public class UserServiceImpl implements UserService {
 
         UserRole role = UserRole.USER;
 
-        // Only allow role override to ADMIN if the requester is already admin — otherwise ignore admin set
+
         if (registrationRequest.getRole() != null && registrationRequest.getRole().equalsIgnoreCase("admin")) {
-            // check if current authenticated user is admin (self-promotion prevention)
+
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated()) {
                 try {

@@ -13,6 +13,6 @@ public class OrderRequest {
     private BigDecimal totalPrice;
     private List<OrderItemRequest> items;
     private LocalDate deliveryDate;
-    private Integer deliveryTime;
+
 //    private Payment paymentInfo;
 }

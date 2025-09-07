@@ -1,5 +1,5 @@
 package com.example.shopBackend.service;
-
+import jakarta.validation.ValidationException;
 import com.example.shopBackend.dto.OrderItemDto;
 import com.example.shopBackend.dto.OrderRequest;
 import com.example.shopBackend.dto.Response;
@@ -10,7 +10,6 @@ import com.example.shopBackend.entity.User;
 import com.example.shopBackend.enums.OrderStatus;
 import com.example.shopBackend.enums.UserRole;
 import com.example.shopBackend.exceptions.NotFoundException;
-import jakarta.validation.ValidationException;
 import com.example.shopBackend.mapper.EntityDtoMapper;
 import com.example.shopBackend.repository.OrderItemRepo;
 import com.example.shopBackend.repository.OrderRepo;
@@ -23,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
+
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -71,10 +72,6 @@ public class OrderItemServiceImpl implements OrderItemService {
         if (deliveryDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
             throw new ValidationException("No deliveries allowed on Sunday");
         }
-        if (orderRequest.getDeliveryTime() == null ||
-                !(orderRequest.getDeliveryTime() == 10 || orderRequest.getDeliveryTime() == 11 || orderRequest.getDeliveryTime() == 12)) {
-            throw new ValidationException("Delivery time must be 10 AM, 11 AM, or 12 PM");
-        }
 
         List<OrderItem> orderItems = orderRequest.getItems().stream().map(orderItemRequest -> {
             if (orderItemRequest.getQuantity() <= 0 || orderItemRequest.getQuantity() > MAX_QUANTITY) {
@@ -94,7 +91,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 
         }).collect(Collectors.toList());
 
-
+        // calculate the total price — trust client only if > 0; otherwise compute server-side
         BigDecimal totalPrice = orderRequest.getTotalPrice() != null && orderRequest.getTotalPrice().compareTo(BigDecimal.ZERO) > 0
                 ? orderRequest.getTotalPrice()
                 : orderItems.stream().map(OrderItem::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -103,11 +100,12 @@ public class OrderItemServiceImpl implements OrderItemService {
             throw new ValidationException("Total price must be greater than zero");
         }
 
-
+        // create order entity
         Order order = new Order();
         order.setOrderItemList(orderItems);
         order.setTotalPrice(totalPrice);
 
+        // set the order reference in each orderitem
         orderItems.forEach(orderItem -> orderItem.setOrder(order));
 
         orderRepo.save(order);
@@ -129,7 +127,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         OrderItem orderItem = orderItemRepo.findById(orderItemId)
                 .orElseThrow(() -> new NotFoundException("Order Item not found"));
 
-
+        // validate and map status
         OrderStatus newStatus;
         try {
             newStatus = OrderStatus.valueOf(status.toUpperCase());
@@ -157,7 +155,10 @@ public class OrderItemServiceImpl implements OrderItemService {
                 .and(OrderItemSpecification.createdBetween(startDate, endDate))
                 .and(OrderItemSpecification.hasItemId(itemId));
 
-
+        // If user is not admin, restrict to their own items
+        if (user.getRole() != UserRole.ADMIN) {
+            spec = spec.and(OrderItemSpecification.hasUserId(user.getId()));
+        }
 
         Page<OrderItem> orderItemPage = orderItemRepo.findAll(spec, pageable);
 

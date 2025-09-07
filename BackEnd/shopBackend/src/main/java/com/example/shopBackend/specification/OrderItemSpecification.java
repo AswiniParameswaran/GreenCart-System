@@ -1,36 +1,35 @@
 package com.example.shopBackend.specification;
 
 import com.example.shopBackend.entity.OrderItem;
-import com.example.shopBackend.enums.OrderStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 
 public class OrderItemSpecification {
-    public static Specification<OrderItem> hasStatus(OrderStatus status){
-        return ((root, query, criteriaBuilder) ->
-                status != null ? criteriaBuilder.equal(root.get("status"), status) : null);
 
+    public static Specification<OrderItem> hasStatus(Enum<?> status) {
+        return (root, query, cb) -> status == null ? null : cb.equal(root.get("status"), status);
     }
 
-    /**Specification to filter order items by data range*/
-    public static Specification<OrderItem> createdBetween(LocalDateTime startDate, LocalDateTime endDate){
-        return ((root, query, criteriaBuilder) -> {
-            if (startDate != null && endDate != null){
-                return criteriaBuilder.between(root.get("createdAt"), startDate, endDate);
+    public static Specification<OrderItem> createdBetween(LocalDateTime startDate, LocalDateTime endDate) {
+        return (root, query, cb) -> {
+            if (startDate != null && endDate != null) {
+                return cb.between(root.get("createdAt"), startDate, endDate);
             } else if (startDate != null) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), startDate);
+                return cb.greaterThanOrEqualTo(root.get("createdAt"), startDate);
             } else if (endDate != null) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), endDate);
-            }else{
-                return null;
+                return cb.lessThanOrEqualTo(root.get("createdAt"), endDate);
             }
-        });
+            return null;
+        };
     }
 
-    /** Generate specification to filter orderitems by item id*/
-    public static Specification<OrderItem> hasItemId(Long itemId){
-        return ((root, query, criteriaBuilder) ->
-                itemId != null ? criteriaBuilder.equal(root.get("id"), itemId) : null);
+    public static Specification<OrderItem> hasItemId(Long itemId) {
+        return (root, query, cb) -> itemId == null ? null : cb.equal(root.get("id"), itemId);
+    }
+
+    // ✅ Add this missing method
+    public static Specification<OrderItem> hasUserId(Long userId) {
+        return (root, query, cb) -> userId == null ? null : cb.equal(root.get("user").get("id"), userId);
     }
 }
