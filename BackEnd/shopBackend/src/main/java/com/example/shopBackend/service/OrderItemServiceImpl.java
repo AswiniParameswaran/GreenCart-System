@@ -25,6 +25,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,7 +61,20 @@ public class OrderItemServiceImpl implements OrderItemService {
         if (orderRequest.getItems().size() > MAX_ITEMS_PER_ORDER) {
             throw new ValidationException("Too many items in order");
         }
-
+        if (orderRequest.getDeliveryDate() == null) {
+            throw new ValidationException("Delivery date is required");
+        }
+        LocalDate deliveryDate = orderRequest.getDeliveryDate();
+        if (!deliveryDate.isAfter(LocalDate.now())) {
+            throw new ValidationException("Delivery date must be in the future");
+        }
+        if (deliveryDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            throw new ValidationException("No deliveries allowed on Sunday");
+        }
+        if (orderRequest.getDeliveryTime() == null ||
+                !(orderRequest.getDeliveryTime() == 10 || orderRequest.getDeliveryTime() == 11 || orderRequest.getDeliveryTime() == 12)) {
+            throw new ValidationException("Delivery time must be 10 AM, 11 AM, or 12 PM");
+        }
 
         List<OrderItem> orderItems = orderRequest.getItems().stream().map(orderItemRequest -> {
             if (orderItemRequest.getQuantity() <= 0 || orderItemRequest.getQuantity() > MAX_QUANTITY) {

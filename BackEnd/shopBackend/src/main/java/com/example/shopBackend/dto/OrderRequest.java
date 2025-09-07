@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -11,5 +12,7 @@ import java.util.List;
 public class OrderRequest {
     private BigDecimal totalPrice;
     private List<OrderItemRequest> items;
+    private LocalDate deliveryDate;
+    private Integer deliveryTime;
 //    private Payment paymentInfo;
 }
