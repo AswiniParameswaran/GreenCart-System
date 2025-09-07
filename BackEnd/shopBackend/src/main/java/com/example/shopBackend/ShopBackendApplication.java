@@ -10,10 +10,7 @@ public class ShopBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ShopBackendApplication.class, args);
 
-		person p = new person();
-		p.setName("Aswini");   // should now work
-		p.setAge(22);
-		System.out.println(p);
+
 	}
 }
 
