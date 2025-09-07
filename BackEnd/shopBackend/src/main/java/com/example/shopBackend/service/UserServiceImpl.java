@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Registration data required");
         }
 
-        // basic validation
+
         if (!StringUtils.hasText(registrationRequest.getName()) || registrationRequest.getName().length() > MAX_NAME_LENGTH) {
             throw new ValidationException("Invalid name");
         }
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Password too short");
         }
 
-        // sanitize user-provided fields
+
         String safeName = xssSanitizer.sanitize(registrationRequest.getName().trim());
         String safeEmail = registrationRequest.getEmail().trim().toLowerCase();
 
@@ -75,14 +75,13 @@ public class UserServiceImpl implements UserService {
                     User current = getLoginUser();
                     if (current != null && current.getRole() == UserRole.ADMIN) {
                         role = UserRole.ADMIN;
-                    } // else keep USER role and ignore requested admin
+                    }
                 } catch (Exception e) {
-                    // ignore and keep USER role
                 }
             }
         }
 
-        // ensure email uniqueness
+
         if (userRepo.findByEmail(safeEmail).isPresent()) {
             throw new ValidationException("Email already registered");
         }

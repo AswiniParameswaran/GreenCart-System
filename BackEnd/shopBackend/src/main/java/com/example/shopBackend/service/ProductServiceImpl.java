@@ -82,19 +82,19 @@ public class ProductServiceImpl implements ProductService {
                 Files.createDirectories(uploadPath);
             }
 
-            // sanitize filename and prevent path traversal
+
             String original = StringUtils.cleanPath(file.getOriginalFilename());
             String safeFilename = System.currentTimeMillis() + "_" + Paths.get(original).getFileName().toString();
             Path filePath = uploadPath.resolve(safeFilename).normalize();
 
-            // defensive check: ensure file path is indeed under uploadPath
+
             if (!filePath.startsWith(uploadPath)) {
                 throw new ValidationException("Invalid file path");
             }
 
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Return the URL to access this file — use a safe mapping in your controller
+
             return "/files/" + safeFilename;
 
         } catch (IOException e) {
@@ -119,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price) {
-        // Only admins may create products
+
         var user = userService.getLoginUser();
         if (user == null || user.getRole() != UserRole.ADMIN) {
             throw new ValidationException("Unauthorized");
@@ -146,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price) {
-        // Only admins may update products
+
         var user = userService.getLoginUser();
         if (user == null || user.getRole() != UserRole.ADMIN) {
             throw new ValidationException("Unauthorized");
@@ -189,7 +189,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Response deleteProduct(Long productId) {
-        // Only admins may delete products
+
         var user = userService.getLoginUser();
         if (user == null || user.getRole() != UserRole.ADMIN) {
             throw new ValidationException("Unauthorized");

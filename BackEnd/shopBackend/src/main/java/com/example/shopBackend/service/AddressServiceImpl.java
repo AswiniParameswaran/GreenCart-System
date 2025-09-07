@@ -26,7 +26,7 @@ public class AddressServiceImpl implements AddressService {
     @Autowired
     private UserService userService;
     @Autowired
-    private XssSanitizer xssSanitizer; // sanitize user inputs
+    private XssSanitizer xssSanitizer;
 
     private static final int MAX_STREET_LENGTH = 200;
     private static final int MAX_CITY_LENGTH = 100;
@@ -36,13 +36,13 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Response saveAndUpdateAddress(AddressDto addressDto) {
-        // require authenticated user
+
         User user = userService.getLoginUser();
         if (user == null) {
             throw new NotFoundException("Authenticated user not found");
         }
 
-        // validate fields (basic)
+
         if (addressDto == null) {
             throw new ValidationException("Address data is required");
         }
@@ -90,7 +90,6 @@ public class AddressServiceImpl implements AddressService {
             throw new ValidationException("Zip code is too long");
         }
 
-        // Basic normalization: trim whitespace
         if (dto.getStreet() != null) dto.setStreet(StringUtils.trimWhitespace(dto.getStreet()));
         if (dto.getCity() != null) dto.setCity(StringUtils.trimWhitespace(dto.getCity()));
         if (dto.getState() != null) dto.setState(StringUtils.trimWhitespace(dto.getState()));

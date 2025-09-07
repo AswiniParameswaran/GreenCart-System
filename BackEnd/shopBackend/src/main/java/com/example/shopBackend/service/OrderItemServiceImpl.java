@@ -60,7 +60,7 @@ public class OrderItemServiceImpl implements OrderItemService {
             throw new ValidationException("Too many items in order");
         }
 
-        // map order request items to order entities
+
         List<OrderItem> orderItems = orderRequest.getItems().stream().map(orderItemRequest -> {
             if (orderItemRequest.getQuantity() <= 0 || orderItemRequest.getQuantity() > MAX_QUANTITY) {
                 throw new ValidationException("Invalid quantity for product id: " + orderItemRequest.getProductId());
@@ -79,7 +79,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 
         }).collect(Collectors.toList());
 
-        // calculate the total price — trust client only if > 0; otherwise compute server-side
+
         BigDecimal totalPrice = orderRequest.getTotalPrice() != null && orderRequest.getTotalPrice().compareTo(BigDecimal.ZERO) > 0
                 ? orderRequest.getTotalPrice()
                 : orderItems.stream().map(OrderItem::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -88,12 +88,11 @@ public class OrderItemServiceImpl implements OrderItemService {
             throw new ValidationException("Total price must be greater than zero");
         }
 
-        // create order entity
+
         Order order = new Order();
         order.setOrderItemList(orderItems);
         order.setTotalPrice(totalPrice);
 
-        // set the order reference in each orderitem
         orderItems.forEach(orderItem -> orderItem.setOrder(order));
 
         orderRepo.save(order);
@@ -115,7 +114,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         OrderItem orderItem = orderItemRepo.findById(orderItemId)
                 .orElseThrow(() -> new NotFoundException("Order Item not found"));
 
-        // validate and map status
+
         OrderStatus newStatus;
         try {
             newStatus = OrderStatus.valueOf(status.toUpperCase());
@@ -143,10 +142,7 @@ public class OrderItemServiceImpl implements OrderItemService {
                 .and(OrderItemSpecification.createdBetween(startDate, endDate))
                 .and(OrderItemSpecification.hasItemId(itemId));
 
-        // If user is not admin, restrict to their own items
-//        if (user.getRole() != UserRole.ADMIN) {
-//            spec = spec.and(OrderItemSpecification.hasUserId(user.getId()));
-//        }
+
 
         Page<OrderItem> orderItemPage = orderItemRepo.findAll(spec, pageable);
 

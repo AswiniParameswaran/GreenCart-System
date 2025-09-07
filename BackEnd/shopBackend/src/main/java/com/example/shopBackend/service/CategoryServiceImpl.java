@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Response createCategory(CategoryDto categoryRequest) {
-        // Only admin allowed to create categories
+
         var user = userService.getLoginUser();
         if (user == null || user.getRole() != UserRole.ADMIN) {
             throw new ValidationException("Unauthorized");
@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Response updateCategory(Long categoryId, CategoryDto categoryRequest) {
-        // Only admin allowed to update
+
         var user = userService.getLoginUser();
         if (user == null || user.getRole() != UserRole.ADMIN) {
             throw new ValidationException("Unauthorized");
@@ -94,7 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Response deleteCategory(Long categoryId) {
-        // Only admin allowed to delete
+
         var user = userService.getLoginUser();
         if (user == null || user.getRole() != UserRole.ADMIN) {
             throw new ValidationException("Unauthorized");
