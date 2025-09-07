@@ -67,10 +67,5 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("admin")
-                .password("{noop}admin123") // {noop} = no encoding for demo
-                .authorities("ADMIN");
-    }
+  
 }
